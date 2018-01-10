@@ -1,34 +1,43 @@
 <link rel="import" href="./bower_components/polymer/polymer-element.html">
 
 <dom-module id="voice-changer">
-  <template>
-    <style>
-      :host {
-      }
-    </style>
-  </template>
+    <template>
+        <style>
+            :host {
+            }
+        </style>
+    </template>
 
-  <script>
-    /**
-     * `voice-changer`
-     * 
-     *
-     * @customElement
-     * @polymer
-     * @demo demo/index.html
-     */
-    class VoiceChanger extends Polymer.Element {
-      static get is() { return 'voice-changer'; }
-      static get properties() {
-        return {
-          prop1: {
-            type: String,
-            value: 'voice-changer'
-          }
-        };
-      }
-    }
+    <script>
+        /**
+         * `voice-changer`
+         *
+         *
+         * @customElement
+         * @polymer
+         * @demo demo/index.html
+         */
+        class VoiceChanger extends Polymer.Element {
+            static get is () { return 'voice-changer'; }
 
-    window.customElements.define(VoiceChanger.is, VoiceChanger);
-  </script>
+            static get properties () {
+                return {
+                    prop1: {
+                        type : String,
+                        value: 'voice-changer'
+                    }
+                };
+            }
+
+            constructor () {
+                super ();
+            }
+
+            ready () {
+                super.ready ();
+            }
+        }
+
+        window.customElements.define (VoiceChanger.is, VoiceChanger);
+    </script>
 </dom-module>
