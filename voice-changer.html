@@ -1,4 +1,5 @@
 <link rel="import" href="./bower_components/polymer/polymer-element.html">
+<link rel="import" href="./bower_components/app-getusermedia/app-getusermedia.html">
 
 <dom-module id="voice-changer">
     <template>
@@ -6,6 +7,7 @@
             :host {
             }
         </style>
+        <app-getusermedia id="getusermedia" audio></app-getusermedia>
     </template>
 
     <script>
@@ -35,6 +37,14 @@
 
             ready () {
                 super.ready ();
+
+                this._getusermedia.addEventListener ('getusermedia', (event) => {
+                    const stream = event.detail.stream;
+                });
+
+                this._getusermedia.addEventListener ('error', (event) => {
+
+                });
             }
         }
 
