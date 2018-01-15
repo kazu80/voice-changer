@@ -33,6 +33,8 @@
 
             constructor () {
                 super ();
+
+                this._audioContext = new AudioContext ();
             }
 
             ready () {
@@ -40,12 +42,73 @@
 
                 this._getusermedia.addEventListener ('getusermedia', (event) => {
                     const stream = event.detail.stream;
+
+                    this._audioSource = this._audioContext.createMediaStreamSource (stream);
                 });
 
                 this._getusermedia.addEventListener ('error', (event) => {
 
                 });
             }
+
+            /*
+            initProcessor() {
+                if (this.pitchShifterProcessor) {
+                    this.pitchShifterProcessor.disconnect();
+                }
+
+                if (this.audioContext.createScriptProcessor) {
+                    this.pitchShifterProcessor = this.audioContext.createScriptProcessor(this.grainSize, 1, 1);
+                }
+
+                this.pitchShifterProcessor.buffer         = new Float32Array(this.grainSize * 2);
+                this.pitchShifterProcessor.grainWindow    = this.hannWindow(this.grainSize);
+                this.pitchShifterProcessor.onaudioprocess = (event) => {
+                    const inputData  = event.inputBuffer.getChannelData(0);
+                    const outputData = event.outputBuffer.getChannelData(0);
+
+                    for (let i = 0; i < inputData.length; i++) {
+
+                        // Apply the window to the input buffer
+                        inputData[i] *= this.pitchShifterProcessor.grainWindow[i];
+
+                        // Shift half of the buffer
+                        this.pitchShifterProcessor.buffer[i] = this.pitchShifterProcessor.buffer[i + this.grainSize];
+
+                        // Empty the buffer tail
+                        this.pitchShifterProcessor.buffer[i + this.grainSize] = 0.0;
+                    }
+
+                    // Calculate the pitch shifted grain re-sampling and looping the input
+                    const grainData = new Float32Array(this.grainSize * 2);
+                    for (let i = 0, j = 0.0;
+                         i < this.grainSize;
+                         i++, j += this.pitchRatio) {
+
+                        const index = Math.floor(j) % this.grainSize;
+                        const a     = inputData[index];
+                        const b     = inputData[(index + 1) % this.grainSize];
+                        grainData[i] += this.linearInterpolation(a, b, j % 1.0) * this.pitchShifterProcessor.grainWindow[i];
+                    }
+
+                    // Copy the grain multiple times overlapping it
+                    for (let i = 0; i < this.grainSize; i += Math.round(this.grainSize * (1 - this.overlapRatio))) {
+                        for (let j = 0; j <= this.grainSize; j++) {
+                            this.pitchShifterProcessor.buffer[i + j] += grainData[j];
+                        }
+                    }
+
+                    // Output the first half of the buffer
+                    for (let i = 0; i < this.grainSize; i++) {
+                        outputData[i] = this.pitchShifterProcessor.buffer[i];
+                    }
+                };
+
+                this.pitchShifterProcessor.connect(this.spectrumAudioAnalyser);
+                this.pitchShifterProcessor.connect(this.sonogramAudioAnalyser);
+                this.pitchShifterProcessor.connect(this.audioContext.destination);
+            }
+            */
         }
 
         window.customElements.define (VoiceChanger.is, VoiceChanger);
