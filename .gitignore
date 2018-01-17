@@ -4,6 +4,7 @@
 .psci_modules
 bower_components
 node_modules
+.idea
 
 # Generated files
 .psci
