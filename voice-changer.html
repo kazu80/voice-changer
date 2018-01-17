@@ -35,11 +35,23 @@
                 super ();
 
                 this._audioContext = new AudioContext ();
+
+                this._spectrumAudioAnalyser = null;
+                this._spectrumFFTSize = 128;
+                this._spectrumSmoothing = 0.8;
+
+                this._sonogramAudioAnalyser = null;
+                this._sonogramFFTSize = 2048;
+                this._sonogramSmoothing = 0;
             }
 
             ready () {
                 super.ready ();
 
+                this.initAudio ();
+            }
+
+            initAudio () {
                 this._getusermedia.addEventListener ('getusermedia', (event) => {
                     const stream = event.detail.stream;
 
@@ -47,8 +59,17 @@
                 });
 
                 this._getusermedia.addEventListener ('error', (event) => {
-
+                    const error_message = event.detail.message;
+                    alert (error_message);
                 });
+
+                this._spectrumAudioAnalyser = this._audioContext.createAnalyser ();
+                this._spectrumAudioAnalyser.fftSize = this._spectrumFFTSize;
+                this._spectrumAudioAnalyser.smoothingTimeConstant = this._spectrumSmoothing;
+
+                this._sonogramAudioAnalyser = this._audioContext.createAnalyser ();
+                this._sonogramAudioAnalyser.fftSize = this._sonogramFFTSize;
+                this._sonogramAudioAnalyser.smoothingTimeConstant = this._sonogramSmoothing;
             }
 
             /*
