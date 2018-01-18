@@ -43,12 +43,22 @@
                 this._sonogramAudioAnalyser = null;
                 this._sonogramFFTSize = 2048;
                 this._sonogramSmoothing = 0;
+
+                this._pitchShifterProcessor = null;
+                this._validGranSizes   = [256, 512, 1024, 2048, 4096, 8192];
+                this._grainSizeKey     = 2;
+                this._grainSize        = this._validGranSizes[this._grainSizeKey - 1];
+                this._pitchRatio       = 1.8;
+                this._overlapRatio     = 0.70;
             }
 
             ready () {
                 super.ready ();
 
                 this.initAudio ();
+                this.initProcessor();
+
+                this._audioSource.connect(this._pitchShifterProcessor);
             }
 
             initAudio () {
@@ -72,64 +82,74 @@
                 this._sonogramAudioAnalyser.smoothingTimeConstant = this._sonogramSmoothing;
             }
 
-            /*
             initProcessor() {
-                if (this.pitchShifterProcessor) {
-                    this.pitchShifterProcessor.disconnect();
+                if (this._pitchShifterProcessor) {
+                    this._pitchShifterProcessor.disconnect();
                 }
 
-                if (this.audioContext.createScriptProcessor) {
-                    this.pitchShifterProcessor = this.audioContext.createScriptProcessor(this.grainSize, 1, 1);
+                if (this._audioContext.createScriptProcessor) {
+                    this._pitchShifterProcessor = this._audioContext.createScriptProcessor(this.grainSize, 1, 1);
                 }
 
-                this.pitchShifterProcessor.buffer         = new Float32Array(this.grainSize * 2);
-                this.pitchShifterProcessor.grainWindow    = this.hannWindow(this.grainSize);
-                this.pitchShifterProcessor.onaudioprocess = (event) => {
+                this._pitchShifterProcessor.buffer         = new Float32Array(this._grainSize * 2);
+                this._pitchShifterProcessor.grainWindow    = this.hannWindow(this._grainSize);
+                this._pitchShifterProcessor.onaudioprocess = (event) => {
                     const inputData  = event.inputBuffer.getChannelData(0);
                     const outputData = event.outputBuffer.getChannelData(0);
 
                     for (let i = 0; i < inputData.length; i++) {
 
                         // Apply the window to the input buffer
-                        inputData[i] *= this.pitchShifterProcessor.grainWindow[i];
+                        inputData[i] *= this._pitchShifterProcessor.grainWindow[i];
 
                         // Shift half of the buffer
-                        this.pitchShifterProcessor.buffer[i] = this.pitchShifterProcessor.buffer[i + this.grainSize];
+                        this._pitchShifterProcessor.buffer[i] = this._pitchShifterProcessor.buffer[i + this._grainSize];
 
                         // Empty the buffer tail
-                        this.pitchShifterProcessor.buffer[i + this.grainSize] = 0.0;
+                        this._pitchShifterProcessor.buffer[i + this._grainSize] = 0.0;
                     }
 
                     // Calculate the pitch shifted grain re-sampling and looping the input
-                    const grainData = new Float32Array(this.grainSize * 2);
+                    const grainData = new Float32Array(this._grainSize * 2);
                     for (let i = 0, j = 0.0;
-                         i < this.grainSize;
-                         i++, j += this.pitchRatio) {
+                         i < this._grainSize;
+                         i++, j += this._pitchRatio) {
 
-                        const index = Math.floor(j) % this.grainSize;
+                        const index = Math.floor(j) % this._grainSize;
                         const a     = inputData[index];
-                        const b     = inputData[(index + 1) % this.grainSize];
-                        grainData[i] += this.linearInterpolation(a, b, j % 1.0) * this.pitchShifterProcessor.grainWindow[i];
+                        const b     = inputData[(index + 1) % this._grainSize];
+                        grainData[i] += this.linearInterpolation(a, b, j % 1.0) * this._pitchShifterProcessor.grainWindow[i];
                     }
 
                     // Copy the grain multiple times overlapping it
-                    for (let i = 0; i < this.grainSize; i += Math.round(this.grainSize * (1 - this.overlapRatio))) {
-                        for (let j = 0; j <= this.grainSize; j++) {
-                            this.pitchShifterProcessor.buffer[i + j] += grainData[j];
+                    for (let i = 0; i < this._grainSize; i += Math.round(this._grainSize * (1 - this._overlapRatio))) {
+                        for (let j = 0; j <= this._grainSize; j++) {
+                            this._pitchShifterProcessor.buffer[i + j] += grainData[j];
                         }
                     }
 
                     // Output the first half of the buffer
-                    for (let i = 0; i < this.grainSize; i++) {
-                        outputData[i] = this.pitchShifterProcessor.buffer[i];
+                    for (let i = 0; i < this._grainSize; i++) {
+                        outputData[i] = this._pitchShifterProcessor.buffer[i];
                     }
                 };
 
-                this.pitchShifterProcessor.connect(this.spectrumAudioAnalyser);
-                this.pitchShifterProcessor.connect(this.sonogramAudioAnalyser);
-                this.pitchShifterProcessor.connect(this.audioContext.destination);
+                this._pitchShifterProcessor.connect(this._spectrumAudioAnalyser);
+                this._pitchShifterProcessor.connect(this._sonogramAudioAnalyser);
+                this._pitchShifterProcessor.connect(this._audioContext.destination);
             }
-            */
+
+            hannWindow(length) {
+                const window = new Float32Array(length);
+                for (let i = 0; i < length; i++) {
+                    window[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (length - 1)));
+                }
+                return window;
+            }
+
+            linearInterpolation(a, b, t) {
+                return a + (b - a) * t;
+            }
         }
 
         window.customElements.define (VoiceChanger.is, VoiceChanger);
