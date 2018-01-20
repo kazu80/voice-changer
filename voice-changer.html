@@ -55,10 +55,9 @@
             ready () {
                 super.ready ();
 
-                this.initAudio ();
-                this.initProcessor();
+                this._getusermedia = this.shadowRoot.querySelector ('#getusermedia');
 
-                this._audioSource.connect(this._pitchShifterProcessor);
+                this.initAudio ();
             }
 
             initAudio () {
@@ -66,6 +65,10 @@
                     const stream = event.detail.stream;
 
                     this._audioSource = this._audioContext.createMediaStreamSource (stream);
+
+                    this.initProcessor ();
+
+                    this._audioSource.connect (this._pitchShifterProcessor);
                 });
 
                 this._getusermedia.addEventListener ('error', (event) => {
@@ -73,6 +76,8 @@
                     alert (error_message);
                 });
 
+                // Analyser
+                /*
                 this._spectrumAudioAnalyser = this._audioContext.createAnalyser ();
                 this._spectrumAudioAnalyser.fftSize = this._spectrumFFTSize;
                 this._spectrumAudioAnalyser.smoothingTimeConstant = this._spectrumSmoothing;
@@ -80,6 +85,7 @@
                 this._sonogramAudioAnalyser = this._audioContext.createAnalyser ();
                 this._sonogramAudioAnalyser.fftSize = this._sonogramFFTSize;
                 this._sonogramAudioAnalyser.smoothingTimeConstant = this._sonogramSmoothing;
+                */
             }
 
             initProcessor() {
@@ -88,7 +94,7 @@
                 }
 
                 if (this._audioContext.createScriptProcessor) {
-                    this._pitchShifterProcessor = this._audioContext.createScriptProcessor(this.grainSize, 1, 1);
+                    this._pitchShifterProcessor = this._audioContext.createScriptProcessor (this._grainSize, 1, 1);
                 }
 
                 this._pitchShifterProcessor.buffer         = new Float32Array(this._grainSize * 2);
@@ -134,8 +140,13 @@
                     }
                 };
 
+                // Analyze
+                /*
                 this._pitchShifterProcessor.connect(this._spectrumAudioAnalyser);
                 this._pitchShifterProcessor.connect(this._sonogramAudioAnalyser);
+                */
+
+                // Destination
                 this._pitchShifterProcessor.connect(this._audioContext.destination);
             }
 
