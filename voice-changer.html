@@ -36,14 +36,6 @@
 
                 this._audioContext = new AudioContext ();
 
-                this._spectrumAudioAnalyser = null;
-                this._spectrumFFTSize = 128;
-                this._spectrumSmoothing = 0.8;
-
-                this._sonogramAudioAnalyser = null;
-                this._sonogramFFTSize = 2048;
-                this._sonogramSmoothing = 0;
-
                 this._pitchShifterProcessor = null;
                 this._validGranSizes   = [256, 512, 1024, 2048, 4096, 8192];
                 this._grainSizeKey     = 2;
@@ -75,17 +67,6 @@
                     const error_message = event.detail.message;
                     alert (error_message);
                 });
-
-                // Analyser
-                /*
-                this._spectrumAudioAnalyser = this._audioContext.createAnalyser ();
-                this._spectrumAudioAnalyser.fftSize = this._spectrumFFTSize;
-                this._spectrumAudioAnalyser.smoothingTimeConstant = this._spectrumSmoothing;
-
-                this._sonogramAudioAnalyser = this._audioContext.createAnalyser ();
-                this._sonogramAudioAnalyser.fftSize = this._sonogramFFTSize;
-                this._sonogramAudioAnalyser.smoothingTimeConstant = this._sonogramSmoothing;
-                */
             }
 
             initProcessor() {
@@ -139,12 +120,6 @@
                         outputData[i] = this._pitchShifterProcessor.buffer[i];
                     }
                 };
-
-                // Analyze
-                /*
-                this._pitchShifterProcessor.connect(this._spectrumAudioAnalyser);
-                this._pitchShifterProcessor.connect(this._sonogramAudioAnalyser);
-                */
 
                 // Destination
                 this._pitchShifterProcessor.connect(this._audioContext.destination);
