@@ -37,9 +37,9 @@
                 this._audioContext = new AudioContext ();
 
                 this._pitchShifterProcessor = null;
-                this._validGranSizes   = [256, 512, 1024, 2048, 4096, 8192];
+                this._validGranSizes = [256, 512, 1024, 2048, 4096, 8192];
                 this._grainSizeKey = 1;
-                this._grainSize        = this._validGranSizes[this._grainSizeKey - 1];
+                this._grainSize = this._validGranSizes[this._grainSizeKey - 1];
                 this._pitchRatio = 2;
                 this._overlapRatio = 0.75;
             }
@@ -69,20 +69,20 @@
                 });
             }
 
-            initProcessor() {
+            initProcessor () {
                 if (this._pitchShifterProcessor) {
-                    this._pitchShifterProcessor.disconnect();
+                    this._pitchShifterProcessor.disconnect ();
                 }
 
                 if (this._audioContext.createScriptProcessor) {
                     this._pitchShifterProcessor = this._audioContext.createScriptProcessor (this._grainSize, 1, 1);
                 }
 
-                this._pitchShifterProcessor.buffer         = new Float32Array(this._grainSize * 2);
+                this._pitchShifterProcessor.buffer = new Float32Array (this._grainSize * 2);
                 this._pitchShifterProcessor.grainWindow = VoiceChanger.hannWindow (this._grainSize);
                 this._pitchShifterProcessor.onaudioprocess = (event) => {
-                    const inputData  = event.inputBuffer.getChannelData(0);
-                    const outputData = event.outputBuffer.getChannelData(0);
+                    const inputData = event.inputBuffer.getChannelData (0);
+                    const outputData = event.outputBuffer.getChannelData (0);
 
                     for (let i = 0; i < inputData.length; i++) {
 
@@ -97,20 +97,20 @@
                     }
 
                     // Calculate the pitch shifted grain re-sampling and looping the input
-                    const grainData = new Float32Array(this._grainSize * 2);
+                    const grainData = new Float32Array (this._grainSize * 2);
                     for (let i = 0, j = 0.0;
                          i < this._grainSize;
                          i++, j += this._pitchRatio) {
 
-                        const index = Math.floor(j) % this._grainSize;
-                        const a     = inputData[index];
-                        const b     = inputData[(index + 1) % this._grainSize];
+                        const index = Math.floor (j) % this._grainSize;
+                        const a = inputData[index];
+                        const b = inputData[(index + 1) % this._grainSize];
                         grainData[i] += VoiceChanger.linearInterpolation (a,
                                                                           b, j % 1.0) * this._pitchShifterProcessor.grainWindow[i];
                     }
 
                     // Copy the grain multiple times overlapping it
-                    for (let i = 0; i < this._grainSize; i += Math.round(this._grainSize * (1 - this._overlapRatio))) {
+                    for (let i = 0; i < this._grainSize; i += Math.round (this._grainSize * (1 - this._overlapRatio))) {
                         for (let j = 0; j <= this._grainSize; j++) {
                             this._pitchShifterProcessor.buffer[i + j] += grainData[j];
                         }
@@ -123,13 +123,13 @@
                 };
 
                 // Destination
-                this._pitchShifterProcessor.connect(this._audioContext.destination);
+                this._pitchShifterProcessor.connect (this._audioContext.destination);
             }
 
             static hannWindow (length) {
-                const window = new Float32Array(length);
+                const window = new Float32Array (length);
                 for (let i = 0; i < length; i++) {
-                    window[i] = 0.5 * (1 - Math.cos(2 * Math.PI * i / (length - 1)));
+                    window[i] = 0.5 * (1 - Math.cos (2 * Math.PI * i / (length - 1)));
                 }
                 return window;
             }
