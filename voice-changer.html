@@ -24,9 +24,8 @@
 
             static get properties () {
                 return {
-                    prop1: {
-                        type : String,
-                        value: 'voice-changer'
+                    stream: {
+                        type: Object,
                     }
                 };
             }
@@ -61,6 +60,7 @@
                     this.initProcessor ();
 
                     this._audioSource.connect (this._pitchShifterProcessor);
+                    this._pitchShifterProcessor.connect (this._audioContext.destination);
                 });
 
                 this._getusermedia.addEventListener ('error', (event) => {
@@ -121,9 +121,6 @@
                         outputData[i] = this._pitchShifterProcessor.buffer[i];
                     }
                 };
-
-                // Destination
-                this._pitchShifterProcessor.connect (this._audioContext.destination);
             }
 
             static hannWindow (length) {
